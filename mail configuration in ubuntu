@@ -1,0 +1,40 @@
+Install the packages
+apt-get install sendmail mailutils
+mailutils allows to run mail command.
+
+Create authentication file
+cd /etc/mail
+mkdir -m 700 authinfo
+cd authinfo/
+nano gmail
+put the following content into it:
+
+AuthInfo: "U:root" "I:your-mail@gmail.com" "P:your-password"
+create hash map of the file:
+
+makemap hash gmail < gmail
+this creates gmail.db in the same directory.
+
+Specify GMail server parameters
+Add the following lines to sendmail.mc file right above MAILER_DEFINITIONS:
+
+#GMail settings:
+define(`SMART_HOST',`[smtp.gmail.com]')dnl
+define(`RELAY_MAILER_ARGS', `TCP $h 587')dnl
+define(`ESMTP_MAILER_ARGS', `TCP $h 587')dnl
+define(`confAUTH_OPTIONS', `A p')dnl
+TRUST_AUTH_MECH(`EXTERNAL DIGEST-MD5 CRAM-MD5 LOGIN PLAIN')dnl
+define(`confAUTH_MECHANISMS', `EXTERNAL GSSAPI DIGEST-MD5 CRAM-MD5 LOGIN PLAIN')dnl
+FEATURE(`authinfo',`hash -o /etc/mail/authinfo/gmail.db')dnl
+
+
+cd /etc/mail
+make
+/etc/init.d/sendmail reload
+If the first attempt of sending email from the command line fails:
+
+echo "DeveloperNote.com A software developer's blog" | mail -s "Interesting website" mail-address@gmail.com
+and the following message comes to GMail inbox:
+
+
+
